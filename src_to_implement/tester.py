@@ -5,6 +5,14 @@ batch_size = 17
 rot = False
 mir = False
 shuf = False
-out_size = None
 
-gen = ImageGenerator("data/exercise_data/", "data/Labels.json", 10, (32,32,3), rot, mir, shuf, out_size=out_size)
+gen = ImageGenerator("exercise_data/", "Labels.json", 50, (32,32,3), rot, mir, shuf)
+print(gen.current_epoch())
+gen.next()
+print(gen.current_epoch())
+gen.next()
+print(gen.current_epoch())
+gen.next()
+print(gen.current_epoch())
+gen.next()
+print(gen.current_epoch())

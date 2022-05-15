@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # This next function returns the next generated object. In our case it returns the input of a neural network each time it gets called.
 # This input consists of a batch of images and its corresponding labels.
 class ImageGenerator:
-    def __init__(self, file_path, label_path, batch_size, image_size, rotation=False, mirroring=False, shuffle=False, out_size = None):
+    def __init__(self, file_path, label_path, batch_size, image_size, rotation=False, mirroring=False, shuffle=False):
         # Define all members of your generator class object as global members here.
         self.file_path = file_path
         self.label_path = label_path
@@ -28,8 +28,6 @@ class ImageGenerator:
             self.batch_size = self.__nsamples
 
         self.__map = np.arange(self.__nsamples)
-        
-        self.out_size = out_size
         # These need to include:
         # the batch size
         # the image size
@@ -47,6 +45,10 @@ class ImageGenerator:
         # In this context a "batch" of images just means a bunch, say 10 images that are forwarded at once.
         # Note that your amount of total data might not be divisible without remainder with the batch_size.
         # Think about how to handle such cases
+        if self.__batch_num * self.batch_size >= self.__nsamples:
+            self.__epoch += 1
+            self.__batch_num = 0
+
         if self.__batch_num == 0 and self.shuffle == True:
             np.random.shuffle(self.__map)
 
@@ -58,9 +60,6 @@ class ImageGenerator:
                 images[i] = self.augment(np.load(f"{self.file_path}/{self.__map[start+i]}.npy"))
                 labels[i] = self.labels[str(self.__map[start+i])]
             self.__batch_num += 1
-            if (self.__batch_num * self.batch_size) == self.__nsamples:
-                self.__batch_num = 0
-                self.__epoch += 1
                     
         elif self.__batch_num * self.batch_size < self.__nsamples:
             last_batch_size = self.__nsamples - self.__batch_num*self.batch_size
@@ -70,8 +69,6 @@ class ImageGenerator:
             for i in range(self.batch_size - last_batch_size):
                 images[last_batch_size+i] = self.augment(np.load(f"{self.file_path}/{self.__map[i]}.npy"))
                 labels[last_batch_size+i] = self.labels[str(self.__map[i])]
-            self.__batch_num = 0
-            self.__epoch += 1
         # print(start, self.__batch_num, self.batch_size, self.__nsamples, self.__epoch)
             
         #TODO: implement next method
@@ -80,8 +77,8 @@ class ImageGenerator:
     def augment(self,img):
         # this function takes a single image as an input and performs a random transformation
         # (mirroring and/or rotation) on it and outputs the transformed image
-        if self.out_size != None and self.out_size != self.image_size:
-            img = np.resize(img, self.out_size)
+        if img.shape != self.image_size:
+            img = np.resize(img, self.image_size)
         if self.mirroring == True:
             if np.random.choice((True, False)):
                 img = np.fliplr(img)
