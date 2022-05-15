@@ -21,13 +21,13 @@ class ImageGenerator:
         self.shuffle = shuffle
         with open(self.label_path, 'r') as f:
             self.labels = json.load(f)
-        self.num_samples = len(self.labels)
-        self.epoch = 0
-        self.batch_num = 0
-        if self.num_samples < self.batch_size or self.batch_size == 0:
-            self.batch_size = self.num_samples
+        self.__nsamples = len(self.labels)
+        self.__epoch = 0
+        self.__batch_num = 0
+        if self.__nsamples < self.batch_size or self.batch_size == 0:
+            self.batch_size = self.__nsamples
 
-        self.map = np.arange(self.num_samples)
+        self.__map = np.arange(self.__nsamples)
         
         self.out_size = out_size
         # These need to include:
@@ -47,31 +47,32 @@ class ImageGenerator:
         # In this context a "batch" of images just means a bunch, say 10 images that are forwarded at once.
         # Note that your amount of total data might not be divisible without remainder with the batch_size.
         # Think about how to handle such cases
-        if self.batch_num == 0 and self.shuffle == True:
-            np.random.shuffle(self.map)
+        if self.__batch_num == 0 and self.shuffle == True:
+            np.random.shuffle(self.__map)
 
         images = np.zeros((self.batch_size, *tuple(self.image_size)))
         labels = np.zeros(self.batch_size, dtype = int)
-        start = self.batch_num * self.batch_size
-        if (self.batch_num + 1) * self.batch_size <= self.num_samples:
+        start = self.__batch_num * self.batch_size
+        if (self.__batch_num + 1) * self.batch_size <= self.__nsamples:
             for i in range(self.batch_size):
-                images[i] = self.augment(np.load(f"{self.file_path}/{self.map[start+i]}.npy"))
-                labels[i] = self.labels[str(self.map[start+i])]
-                self.batch_num += 1
-                if self.batch_num * self.batch_size == self.num_samples:
-                    self.batch_num = 0
-                    self.epoch += 1
+                images[i] = self.augment(np.load(f"{self.file_path}/{self.__map[start+i]}.npy"))
+                labels[i] = self.labels[str(self.__map[start+i])]
+            self.__batch_num += 1
+            if (self.__batch_num * self.batch_size) == self.__nsamples:
+                self.__batch_num = 0
+                self.__epoch += 1
                     
-        elif self.batch_num * self.batch_size < self.num_samples:
-            last_batch_size = self.num_samples - self.batch_num*self.batch_size
+        elif self.__batch_num * self.batch_size < self.__nsamples:
+            last_batch_size = self.__nsamples - self.__batch_num*self.batch_size
             for i in range(last_batch_size):
-                images[i] = self.augment(np.load(f"{self.file_path}/{self.map[start+i]}.npy"))
-                labels[i] = self.labels[str(self.map[start+i])]
+                images[i] = self.augment(np.load(f"{self.file_path}/{self.__map[start+i]}.npy"))
+                labels[i] = self.labels[str(self.__map[start+i])]
             for i in range(self.batch_size - last_batch_size):
-                images[last_batch_size+i] = self.augment(np.load(f"{self.file_path}/{self.map[i]}.npy"))
-                labels[last_batch_size+i] = self.labels[str(self.map[i])]
-            self.batch_num = 0
-            self.epoch += 1
+                images[last_batch_size+i] = self.augment(np.load(f"{self.file_path}/{self.__map[i]}.npy"))
+                labels[last_batch_size+i] = self.labels[str(self.__map[i])]
+            self.__batch_num = 0
+            self.__epoch += 1
+        # print(start, self.__batch_num, self.batch_size, self.__nsamples, self.__epoch)
             
         #TODO: implement next method
         return images, labels
@@ -95,7 +96,7 @@ class ImageGenerator:
 
     def current_epoch(self):
         # return the current epoch number
-        return self.epoch
+        return self.__epoch
 
     def class_name(self, x):
         # This function returns the class name for a specific input
