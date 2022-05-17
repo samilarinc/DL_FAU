@@ -108,7 +108,7 @@ class ImageGenerator:
         cols = 3
         rows = self.batch_size // 3 + (1 if self.batch_size % 3 else 0)
 
-        for i in range(1, self.batch_size):
+        for i in range(1, self.batch_size+1):
             img = imgs[i-1]
             lab = self.class_dict[labs[i-1]]
             fig.add_subplot(rows, cols, i)
