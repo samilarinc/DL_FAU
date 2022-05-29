@@ -8,9 +8,9 @@ class SoftMax(Base.BaseLayer):
 
     def forward(self, input_tensor):
         self.lastIn = input_tensor
-        temp = np.exp(input_tensor - input_tensor.max())
-        self.lastOut = temp / temp.sum()
+        temp = np.exp(input_tensor - input_tensor.max(axis = 1)[np.newaxis].T)
+        self.lastOut = temp / temp.sum(axis = 1)[np.newaxis].T
         return self.lastOut
 
     def backward(self, error_tensor):
-        return self._optimizer.calculate_update(self.lastIn, error_tensor)
+        return self.lastOut * (error_tensor - (error_tensor * self.lastOut).sum(axis = 1)[np.newaxis].T)
