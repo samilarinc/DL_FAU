@@ -13,4 +13,4 @@ class SoftMax(Base.BaseLayer):
         return self.lastOut
 
     def backward(self, error_tensor):
-        pass
+        return self._optimizer.calculate_update(self.lastIn, error_tensor)

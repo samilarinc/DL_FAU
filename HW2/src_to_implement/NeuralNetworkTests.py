@@ -1,6 +1,6 @@
 import unittest
 from Layers import FullyConnected, Base, Helpers, ReLU, SoftMax
-from Optimization import Optimizers
+from Optimization import Optimizers, Loss
 import numpy as np
 # import NeuralNetwork
 import matplotlib.pyplot as plt
