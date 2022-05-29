@@ -1,6 +1,9 @@
 # Byte-compiled / optimized / DLL files
 HW1/src_to_implement/__pycache__/
-HW1/src_to_implement/__pycache__/*.pyc
+HW2/src_to_implement/Layers/__pycache__/
+HW2/src_to_implement/Optimization/__pycache__/
+HW2/src_to_implement/__pycache__/
+
 
 # C extensions
 *.so
