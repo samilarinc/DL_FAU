@@ -1,10 +1,10 @@
 import unittest
-from Layers import *
+from Layers import Flatten, Initializers
 from Optimization import *
 import numpy as np
 from scipy import stats
 from scipy.ndimage.filters import gaussian_filter
-import NeuralNetwork
+# import NeuralNetwork
 import matplotlib.pyplot as plt
 import os
 import tabulate
@@ -406,9 +406,9 @@ class TestInitializers(unittest.TestCase):
 class TestFlatten(unittest.TestCase):
 
     def setUp(self):
-        self.batch_size = 9
+        self.batch_size = 9 
         self.input_shape = (3, 4, 11)
-        self.input_tensor = np.array(range(int(np.prod(self.input_shape) * self.batch_size)), dtype=np.float)
+        self.input_tensor = np.array(range(int(np.prod(self.input_shape) * self.batch_size)), dtype=float)
         self.input_tensor = self.input_tensor.reshape(self.batch_size, *self.input_shape)
 
     def test_trainable(self):
@@ -418,7 +418,7 @@ class TestFlatten(unittest.TestCase):
     def test_flatten_forward(self):
         flatten = Flatten.Flatten()
         output_tensor = flatten.forward(self.input_tensor)
-        input_vector = np.array(range(int(np.prod(self.input_shape) * self.batch_size)), dtype=np.float)
+        input_vector = np.array(range(int(np.prod(self.input_shape) * self.batch_size)), dtype=float)
         input_vector = input_vector.reshape(self.batch_size, np.prod(self.input_shape))
         self.assertLessEqual(np.sum(np.abs(output_tensor-input_vector)), 1e-9)
 
