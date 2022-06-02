@@ -7,7 +7,6 @@ HW3/src_to_implement/__pycache__/
 HW3/src_to_implement/Layers/__pycache__/
 HW3/src_to_implement/Optimization/__pycache__/
 
-
 # C extensions
 *.so
 
