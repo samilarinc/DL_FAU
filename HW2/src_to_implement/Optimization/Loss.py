@@ -5,6 +5,9 @@ class CrossEntropyLoss(object):
     def __init__(self):
         pass
         
+    def __call__(self, *args):
+        return self.forward(*args)
+        
     def forward(self, prediction_tensor, label_tensor):
         self.lastIn = prediction_tensor
         y_hat = prediction_tensor
