@@ -9,8 +9,14 @@ class Conv(Base.BaseLayer):
         self.num_kernels = num_kernels
         self.weights = np.random.uniform(size = (num_kernels, num_kernels, *convolution_shape))
         self.bias = np.random.uniform(size = (convolution_shape))
+        self.gradient_weights = None
+        self.gradient_bias = None
 
     def forward(self, input_tensor):
         raise NotImplementedError
 
 
+
+    def initialize(self, weights_initializer, bias_initializer):
+        self.weights = weights_initializer
+        self.bias = bias_initializer

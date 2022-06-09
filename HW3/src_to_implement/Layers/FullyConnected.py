@@ -37,5 +37,12 @@ class FullyConnected(Base.BaseLayer):
         self.gradient_weights = dW
        
         return dx
+
+    #From HW3 append:
+
+    def initialize(self, weights_initializer, bias_initializer):
+        self.weights = weights_initializer
+        self.bias = bias_initializer
+
     
     

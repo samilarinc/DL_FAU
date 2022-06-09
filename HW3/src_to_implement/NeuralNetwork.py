@@ -2,12 +2,15 @@ import copy
 import numpy as np
 
 class NeuralNetwork(object):
-    def __init__(self, optimizer):
+    def __init__(self, optimizer, weights_initializer, bias_initializer):
         self.optimizer = optimizer
         self.loss = list()
         self.layers = list()
         self.data_layer = None
         self.loss_layer = None
+
+        self.weights_initializer = weights_initializer
+        self.bias_initializer = bias_initializer
     
     def forward(self):
         data, self.label = copy.deepcopy(self.data_layer.next())
@@ -22,7 +25,10 @@ class NeuralNetwork(object):
             y = layer.backward(y)
 
     def append_layer(self, layer):
+        
         if layer.trainable:
+            layer.weights = self.weights_initializer
+            layer.bias = self.bias_initializer
             layer.optimizer = copy.deepcopy(self.optimizer)
         self.layers.append(layer)
     

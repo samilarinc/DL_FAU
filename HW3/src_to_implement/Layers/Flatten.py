@@ -11,3 +11,4 @@ class Flatten(Base.BaseLayer):
 
     def backward(self, error_tensor):
         return error_tensor.reshape(self.lastShape)
+        #lastshape[0]
