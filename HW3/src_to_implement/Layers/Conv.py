@@ -40,7 +40,7 @@ class Conv(Base.BaseLayer):
             for f in range(self.x_s.shape[1]):
                 for i in range(self.x_s.shape[2]):
                     for j in range(self.x_s.shape[3]):
-                        output_tensor[n, f, i, j] = np.sum(self.x_s[n, :, i*self.stride:i*self.stride+self.convolution_shape[0], j*self.stride : j*self.stride + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
+                        output_tensor[n, f, i, j] = np.sum(self.x_s[n, :, i*self.stride_shape:i*self.stride_shape+self.convolution_shape[0], j*self.stride_shape : j*self.stride_shape + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
         return output_tensor
 
     @property
@@ -53,49 +53,56 @@ class Conv(Base.BaseLayer):
         
     def backward(self, error_tensor):
 
-        N = 1 # number of examples
-        F = 1 # number of filters
-        C = 1 # number of channels
-        H = 5 # height inputs
-        W = 5 # width inputs
-        HH = 3 # height filter
-        WW = 3 # width filter
-        x = np.random.randn(N, C, H, W)
-        w = np.random.randn(F, C, HH, WW)
-        b = np.random.randn(F,)
-        conv_param = {'stride': 1, 'pad': 0}
+        # N = 1 # number of examples
+        # F = 1 # number of filters
+        # C = 1 # number of channels
+        # H = 5 # height inputs
+        # W = 5 # width inputs
+        # HH = 3 # height filter
+        # WW = 3 # width filter
+        # x = np.random.randn(N, C, H, W)
+        # w = np.random.randn(F, C, HH, WW)
+        # b = np.random.randn(F,)
+        # conv_param = {'stride': 1, 'pad': 0}
 
-        # stride = conv_param['stride']
-        pad = conv_param['pad']
+        # # stride = conv_param['stride']
+        # pad = conv_param['pad']
 
-        stride = self.stride_shape
+        # stride = self.stride_shape
 
-        # dimensions of the output
-        H1 = int(1 + (H + 2 * pad - HH)/stride)
-        W1 = int(1 + (W + 2 * pad - WW)/stride)
+        # # dimensions of the output
+        # H1 = int(1 + (H + 2 * pad - HH)/stride)
+        # W1 = int(1 + (W + 2 * pad - WW)/stride)
 
-        # incoming gradient dL/dY
-        dout = np.random.randn(N, F, H1, W1)
+        # # incoming gradient dL/dY
+        # dout = np.random.randn(N, F, H1, W1)
 
-        dx = np.zeros(x.shape)
-        # loop through the number of examples
-        for n in range(N):
-            # hi and wi - looping through x
-            for hi in range(H):
-                for wi in range(W):
-                    # i and j - looping through output 
-                    y_idxs = []
-                    w_idxs = []
-                    for i in range(H1):
-                        for j in range(W1):
-                            # check if within weights limits
-                            if ((hi + pad - i * stride) >= 0) and ((hi + pad - i * stride) < HH) and ((wi + pad - j * stride) >= 0) and ((wi + pad - j * stride) < WW):
-                                w_idxs.append((hi + pad - i * stride, wi + pad - j * stride))
-                                y_idxs.append((i, j))
+        # dx = np.zeros(x.shape)
+        # # loop through the number of examples
+        # for n in range(N):
+        #     # hi and wi - looping through x
+        #     for hi in range(H):
+        #         for wi in range(W):
+        #             # i and j - looping through output 
+        #             y_idxs = []
+        #             w_idxs = []
+        #             for i in range(H1):
+        #                 for j in range(W1):
+        #                     # check if within weights limits
+        #                     if ((hi + pad - i * stride) >= 0) and ((hi + pad - i * stride) < HH) and ((wi + pad - j * stride) >= 0) and ((wi + pad - j * stride) < WW):
+        #                         w_idxs.append((hi + pad - i * stride, wi + pad - j * stride))
+        #                         y_idxs.append((i, j))
 
-                    # loop through filters
-                    for f in range(F):
-                        dx[n, : , hi, wi] += np.sum([w[f, :, widx[0], widx[1]] * dout[n, f, yidx[0], yidx[1]] for widx, yidx in zip(w_idxs, y_idxs)], 0)
+        #             # loop through filters
+        #             for f in range(F):
+        #                 dx[n, : , hi, wi] += np.sum([w[f, :, widx[0], widx[1]] * dout[n, f, yidx[0], yidx[1]] for widx, yidx in zip(w_idxs, y_idxs)], 0)
+
+        # for f in range(F):
+        #     # looping through channels
+        #     for c in range(C):
+        #         for i in range(HH):
+        #             for j in range(WW):
+        #                 dw[f, c, i ,j] = np.sum(padded_x[:,  c, i: i + H1 * stride : stride, j : j + W1* stride : stride] * dout[:, f, :, :])
 
 
         dx = np.dot(error_tensor, self.weights.T)
