@@ -42,7 +42,7 @@ class Conv(Base.BaseLayer):
             for f in range(self.x_s.shape[1]):
                 for i in range(self.x_s.shape[2]):
                     for j in range(self.x_s.shape[3]):
-                        output_tensor[n, f, i, j] = np.sum(self.x_s[n, :, i*self.stride_shape[0]:i*self.stride_shape[0]+self.convolution_shape[0], j*self.stride_shape[1] : j*self.stride_shape[1] + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
+                        output_tensor[n, f, i, j] = np.sum(input_tensor[n, :, i*self.stride_shape[0]:i*self.stride_shape[0]+self.convolution_shape[0], j*self.stride_shape[1] : j*self.stride_shape[1] + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
         return output_tensor
 
     @property
