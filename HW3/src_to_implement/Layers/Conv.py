@@ -21,6 +21,8 @@ class Conv(Base.BaseLayer):
         self.bias = np.random.uniform(size = (num_kernels,))
         self.gradient_weights = None
         self.gradient_bias = None
+        self._optimizer = None
+        self.lastShape = None
 
     def forward(self, input_tensor):
         if input_tensor.ndim == 3:
@@ -31,6 +33,7 @@ class Conv(Base.BaseLayer):
         p2 = int(self.convolution_shape[2]//2 == self.convolution_shape[2]/2)
         padded_image[:, :, (self.convolution_shape[1]//2):-(self.convolution_shape[1]//2)+p1, (self.convolution_shape[2]//2):-(self.convolution_shape[2]//2)+p2] = input_tensor
         input_tensor = padded_image
+        self.padded = padded_image.copy()
         # dimensions of the output
         h_cnn = np.ceil((padded_image.shape[2] - self.convolution_shape[1] + 1) / self.stride_shape[0])
         v_cnn = np.ceil((padded_image.shape[3] - self.convolution_shape[2] + 1) / self.stride_shape[1])
@@ -60,75 +63,42 @@ class Conv(Base.BaseLayer):
     @optimizer.setter
     def optimizer(self, optimizer):
         self._optimizer = optimizer
+        self._optimizer.weights = optimizer
+        self._optimizer.bias = optimizer
         
     def backward(self, error_tensor):
+        self.gradient_weights = np.zeros(self.weights.shape)
+        self.gradient_bias = np.zeros(self.bias.shape)
+        return_tensor = np.zeros(self.lastShape)
+        padded_error = np.zeros((error_tensor.shape[0], error_tensor.shape[1], error_tensor.shape[2] + self.convolution_shape[1] - 1, error_tensor.shape[3] + self.convolution_shape[2] - 1))
+        p1 = int(self.convolution_shape[1]//2 == self.convolution_shape[1]/2)
+        p2 = int(self.convolution_shape[2]//2 == self.convolution_shape[2]/2)
+        padded_error[:, :, (self.convolution_shape[1]//2):-(self.convolution_shape[1]//2)+p1, (self.convolution_shape[2]//2):-(self.convolution_shape[2]//2)+p2] = error_tensor
+        # loop through the number of examples
+        for n in range(padded_error.shape[0]):
+            # loop through the number of filters
+            for f in range(self.num_kernels):
+                    # loop through the height of the output
+                    for i in range(padded_error.shape[2]):
+                        # loop through the width of the output
+                        for j in range(padded_error.shape[3]):
+                            # check if within weights limits
+                            if ((i * self.stride_shape[0]) + self.convolution_shape[1] <= self.lastShape[2]) and ((j * self.stride_shape[1]) + self.convolution_shape[2] <= self.lastShape[3]):
+                                return_tensor[n, :, i*self.stride_shape[0]:i*self.stride_shape[0] + self.convolution_shape[1], j*self.stride_shape[1]:j*self.stride_shape[1] + self.convolution_shape[2]] += error_tensor[n, f, i, j] * self.weights[f, :, :, :]
+                                self.gradient_weights[f, :, :, :] += padded_error[n, f, i, j] * self.padded[n, :, i*self.stride_shape[0]:i*self.stride_shape[0] + self.convolution_shape[1], j*self.stride_shape[1]:j*self.stride_shape[1] + self.convolution_shape[2]]
+                                self.gradient_bias[f] += padded_error[n, f, i, j]
+                            else:
+                                return_tensor[n, :, i*self.stride_shape[0]:i*self.stride_shape[0] + self.convolution_shape[1], j*self.stride_shape[1]:j*self.stride_shape[1] + self.convolution_shape[2]] += 0
+                                self.gradient_weights[f, :, :, :] += 0
+                                self.gradient_bias[f] += 0
+                                
+        if self.optimizer is not None:
+            self.weights = self._optimizer.weights.update(self.weights, self.gradient_weights)
+            self.bias = self._optimizer.bias.update(self.bias, self.gradient_bias)
 
-        # N = 1 # number of examples
-        # F = 1 # number of filters
-        # C = 1 # number of channels
-        # H = 5 # height inputs
-        # W = 5 # width inputs
-        # HH = 3 # height filter
-        # WW = 3 # width filter
-        # x = np.random.randn(N, C, H, W)
-        # w = np.random.randn(F, C, HH, WW)
-        # b = np.random.randn(F,)
-        # conv_param = {'stride': 1, 'pad': 0}
+        return return_tensor
 
-        # # stride = conv_param['stride']
-        # pad = conv_param['pad']
-
-        # stride = self.stride_shape
-
-        # # dimensions of the output
-        # H1 = int(1 + (H + 2 * pad - HH)/stride)
-        # W1 = int(1 + (W + 2 * pad - WW)/stride)
-
-        # # incoming gradient dL/dY
-        # dout = np.random.randn(N, F, H1, W1)
-
-        # dx = np.zeros(x.shape)
-        # # loop through the number of examples
-        # for n in range(N):
-        #     # hi and wi - looping through x
-        #     for hi in range(H):
-        #         for wi in range(W):
-        #             # i and j - looping through output 
-        #             y_idxs = []
-        #             w_idxs = []
-        #             for i in range(H1):
-        #                 for j in range(W1):
-        #                     # check if within weights limits
-        #                     if ((hi + pad - i * stride) >= 0) and ((hi + pad - i * stride) < HH) and ((wi + pad - j * stride) >= 0) and ((wi + pad - j * stride) < WW):
-        #                         w_idxs.append((hi + pad - i * stride, wi + pad - j * stride))
-        #                         y_idxs.append((i, j))
-
-        #             # loop through filters
-        #             for f in range(F):
-        #                 dx[n, : , hi, wi] += np.sum([w[f, :, widx[0], widx[1]] * dout[n, f, yidx[0], yidx[1]] for widx, yidx in zip(w_idxs, y_idxs)], 0)
-
-        # for f in range(F):
-        #     # looping through channels
-        #     for c in range(C):
-        #         for i in range(HH):
-        #             for j in range(WW):
-        #                 dw[f, c, i ,j] = np.sum(padded_x[:,  c, i: i + H1 * stride : stride, j : j + W1* stride : stride] * dout[:, f, :, :])
-
-
-        dx = np.dot(error_tensor, self.weights.T)
-        dW = np.dot(self.lastIn.T, error_tensor)
-        if self._optimizer != None:
-            self.weights = self._optimizer.calculate_update(self.weights, dW)
-            self.bias = self._optimizer.calculate_update(self.bias, error_tensor)
-       
-        self.gradient_bias = error_tensor
-        self.gradient_weights = dW
-       
-        return dx
-
-
-
-
+        
     def initialize(self, weights_initializer, bias_initializer):
         self.weights = weights_initializer
         self.bias = bias_initializer
