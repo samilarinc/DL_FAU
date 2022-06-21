@@ -20,7 +20,8 @@ class Conv(Base.BaseLayer):
         if input_tensor.ndim == 3:
             input_tensor.reshape(*input_tensor.shape,input_tensor.shape[2])
         self.lastShape = input_tensor.shape
-
+        padded_image = np.zeros((input_tensor.shape[0], input_tensor.shape[1], *(input_tensor.shape[2:] + self.convolution_shape)))
+        padded_image[:, :, self.convolution_shape[0]:-self.convolution_shape[0], self.convolution_shape[1]:-self.convolution_shape[1]] = input_tensor
         # N = 1 # number of examples
         # F = 1 # number of filters
         # C = 1 # number of channels
