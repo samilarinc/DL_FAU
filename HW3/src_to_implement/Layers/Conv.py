@@ -12,12 +12,13 @@ class Conv(Base.BaseLayer):
             stride_shape = (stride_shape[0], stride_shape[0])
         self.stride_shape = stride_shape
         self.conv2d = (len(convolution_shape) == 3)
+        self.weights = np.random.uniform(size = (num_kernels, *convolution_shape))
         if self.conv2d:
             self.convolution_shape = convolution_shape
         else:
             self.convolution_shape = (*convolution_shape, 1)
+            self.weights = self.weights[:, :, :, np.newaxis]
         self.num_kernels = num_kernels
-        self.weights = np.random.uniform(size = (num_kernels, *convolution_shape))
         self.bias = np.random.uniform(size = (num_kernels,))
         self.gradient_weights = None
         self.gradient_bias = None
@@ -31,7 +32,11 @@ class Conv(Base.BaseLayer):
         padded_image = np.zeros((input_tensor.shape[0], input_tensor.shape[1], input_tensor.shape[2] + self.convolution_shape[1] - 1, input_tensor.shape[3] + self.convolution_shape[2] - 1))
         p1 = int(self.convolution_shape[1]//2 == self.convolution_shape[1]/2)
         p2 = int(self.convolution_shape[2]//2 == self.convolution_shape[2]/2)
-        padded_image[:, :, (self.convolution_shape[1]//2):-(self.convolution_shape[1]//2)+p1, (self.convolution_shape[2]//2):-(self.convolution_shape[2]//2)+p2] = input_tensor
+        if self.convolution_shape[1]//2 == 0 and self.convolution_shape[2]//2 == 0:
+            padded_image = input_tensor
+        else:
+            padded_image[:, :, (self.convolution_shape[1]//2):-(self.convolution_shape[1]//2)+p1, (self.convolution_shape[2]//2):-(self.convolution_shape[2]//2)+p2] = input_tensor
+            
         input_tensor = padded_image
         self.padded = padded_image.copy()
         # dimensions of the output
@@ -54,6 +59,8 @@ class Conv(Base.BaseLayer):
                                 output_tensor[n, f, i, j] += self.bias[f]
                             else:
                                 output_tensor[n, f, i, j] = 0
+        if not self.conv2d:
+            return output_tensor.squeeze(axis = 3)
         return output_tensor
 
     @property
@@ -67,6 +74,7 @@ class Conv(Base.BaseLayer):
         self._optimizer.bias = optimizer
         
     def backward(self, error_tensor):
+        raise NotImplementedError
         self.gradient_weights = np.zeros(self.weights.shape)
         self.gradient_bias = np.zeros(self.bias.shape)
         return_tensor = np.zeros(self.lastShape)
@@ -100,5 +108,5 @@ class Conv(Base.BaseLayer):
 
         
     def initialize(self, weights_initializer, bias_initializer):
-        self.weights = weights_initializer
-        self.bias = bias_initializer
+        self.weights = weights_initializer.initialize(self.weights.shape, np.prod(self.convolution_shape), np.prod(self.convolution_shape[1:]) * self.num_kernels)
+        self.bias = bias_initializer.initialize(self.bias.shape, 1, self.num_kernels)
