@@ -102,9 +102,9 @@ class Conv(Base.BaseLayer):
         self.padding_X = np.zeros((*self.input_tensor.shape[:2], self.input_tensor.shape[2] + self.conv_row - 1,
                                    self.input_tensor.shape[3] + self.conv_col - 1))
         # Bias
-        self.grad_bias = np.zeros(self.num_kernels)
+        self.gradient_bias = np.zeros(self.num_kernels)
         # gradient with respect to the weights
-        self.grad_weights = np.zeros(self.weights.shape)
+        self.gradient_weights = np.zeros(self.weights.shape)
 
         #########################
 
@@ -116,7 +116,7 @@ class Conv(Base.BaseLayer):
         for batch in range(self.up_error_T.shape[0]):
             for ker_num in range(self.up_error_T.shape[1]):
                 # gradient with respect to the bias
-                self.grad_bias[ker_num] += np.sum(error_tensor[batch, ker_num, :])
+                self.gradient_bias[ker_num] += np.sum(error_tensor[batch, ker_num, :])
 
                 for ht in range(self.error_T.shape[2]):
                     for wdt in range(self.error_T.shape[3]):
@@ -136,13 +136,13 @@ class Conv(Base.BaseLayer):
 
             for ker_num in range(self.num_kernels):
                 for ch in range(self.input_tensor.shape[1]):
-                    self.grad_weights[ker_num, ch, :] += correlate2d(self.padding_X[batch, ch, :],
+                    self.gradient_weights[ker_num, ch, :] += correlate2d(self.padding_X[batch, ch, :],
                                                               self.up_error_T[batch, ker_num, :],'valid')  # convolution of the error tensor with the padded input tensor
 
 
         if self._optimizer is not None:
-            self.weights = self.optimizer.weights.calculate_update(self.weights, self.grad_weights)
-            self.bias = self._optimizer.bias.calculate_update(self.bias, self.grad_bias)
+            self.weights = self._optimizer.weights.calculate_update(self.weights, self.gradient_weights)
+            self.bias = self._optimizer.bias.calculate_update(self.bias, self.gradient_bias)
 
         # again distinction between 2d and 3d
         if len(self.convolution_shape) == 2:   #if self.dim1:
