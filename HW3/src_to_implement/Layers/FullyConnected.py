@@ -6,6 +6,8 @@ class FullyConnected(Base.BaseLayer):
     def __init__(self, input_size, output_size):
         super().__init__()
         self.trainable = True
+        self.input_size = input_size
+        self.output_size = output_size
         self.weights = np.random.uniform(size = (input_size, output_size))
         self.bias = np.random.uniform(size = (1, output_size))
         self.gradient_weights = None
@@ -41,8 +43,8 @@ class FullyConnected(Base.BaseLayer):
     #From HW3 append:
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.weights = weights_initializer
-        self.bias = bias_initializer
+        self.weights = weights_initializer.initialize(self.weights.shape, self.input_size, self.output_size)
+        self.bias = bias_initializer.initialize(self.bias.shape, 1, self.output_size)
 
     
     
