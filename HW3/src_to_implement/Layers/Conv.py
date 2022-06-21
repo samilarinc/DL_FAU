@@ -25,8 +25,10 @@ class Conv(Base.BaseLayer):
         b = np.random.randn(F,)
         conv_param = {'stride': 1, 'pad': 0}
 
-        stride = conv_param['stride']
+        # stride = conv_param['stride']
         pad = conv_param['pad']
+
+        stride = self.stride_shape
 
         # dimensions of the output
         H1 = int(1 + (H + 2 * pad - HH)/stride)
@@ -60,11 +62,19 @@ class Conv(Base.BaseLayer):
         W = 5 # width inputs
         HH = 3 # height filter
         WW = 3 # width filter
+        x = np.random.randn(N, C, H, W)
+        w = np.random.randn(F, C, HH, WW)
+        b = np.random.randn(F,)
+        conv_param = {'stride': 1, 'pad': 0}
 
-        H1 = int(1 + (H - HH)/stride)
-        W1 = int(1 + (W - WW)/stride)
+        # stride = conv_param['stride']
+        pad = conv_param['pad']
 
-        pad = 0
+        stride = self.stride_shape
+
+        # dimensions of the output
+        H1 = int(1 + (H + 2 * pad - HH)/stride)
+        W1 = int(1 + (W + 2 * pad - WW)/stride)
 
         # incoming gradient dL/dY
         dout = np.random.randn(N, F, H1, W1)
@@ -100,6 +110,7 @@ class Conv(Base.BaseLayer):
         self.gradient_weights = dW
        
         return dx
+
 
 
 
