@@ -4,7 +4,10 @@ from Layers import Base
 class Conv(Base.BaseLayer):
     def __init__(self, stride_shape, convolution_shape, num_kernels):
         self.trainable = True
+        if type(stride_shape) == int:
+            stride_shape = (stride_shape, stride_shape)
         self.stride_shape = stride_shape
+        self.conv2d = (len(convolution_shape) == 3)
         self.convolution_shape = convolution_shape
         self.num_kernels = num_kernels
         self.weights = np.random.uniform(size = (num_kernels, num_kernels, *convolution_shape))
@@ -53,6 +56,10 @@ class Conv(Base.BaseLayer):
     def optimizer(self):
         return self._optimizer
 
+    @optimizer.setter
+    def optimizer(self, optimizer):
+        self._optimizer = optimizer
+        
     def backward(self, error_tensor):
 
         N = 1 # number of examples
