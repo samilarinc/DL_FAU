@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 from Layers import Base
 from scipy import convolve
 
