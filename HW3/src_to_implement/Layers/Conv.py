@@ -37,15 +37,6 @@ class Conv(Base.BaseLayer):
             
         output_tensor = np.zeros((input_tensor.shape[0], self.num_kernels, int(h_cnn), int(v_cnn)))
         
-<<<<<<< HEAD
-        # output_tensor = signal.convolve(input_tensor, )
-
-        for n in range(input_tensor.shape[0]):
-            for f in range(input_tensor.shape[1]):
-                for i in range(input_tensor.shape[2]):
-                    for j in range(input_tensor.shape[3]):
-                        output_tensor[n, f, i, j] = np.sum(input_tensor[n, :, i*self.stride_shape[0]:i*self.stride_shape[0]+self.convolution_shape[0], j*self.stride_shape[1] : j*self.stride_shape[1] + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
-=======
         # loop through the number of examples
         for n in range(input_tensor.shape[0]):
             # loop through the number of filters
@@ -60,7 +51,6 @@ class Conv(Base.BaseLayer):
                                 output_tensor[n, f, i, j] += self.bias[f]
                             else:
                                 output_tensor[n, f, i, j] = 0
->>>>>>> 1a4afa5d320561eb2a4f85e8c00c795af2b36a5e
         return output_tensor
 
     @property
