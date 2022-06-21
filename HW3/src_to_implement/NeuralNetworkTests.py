@@ -545,13 +545,13 @@ class TestConv(unittest.TestCase):
         error_tensor = conv.backward(output_tensor)
         self.assertEqual(error_tensor.shape, (self.batch_size, *self.input_shape))
 
-    # def test_backward_size_stride(self):
-    #     conv = Conv.Conv((3, 2), self.kernel_shape, self.num_kernels)
-    #     input_tensor = np.array(range(np.prod(self.input_shape) * self.batch_size), dtype=float)
-    #     input_tensor = input_tensor.reshape(self.batch_size, *self.input_shape)
-    #     output_tensor = conv.forward(input_tensor)
-    #     error_tensor = conv.backward(output_tensor)
-    #     self.assertEqual(error_tensor.shape, (self.batch_size, *self.input_shape))
+    def test_backward_size_stride(self):
+        conv = Conv.Conv((3, 2), self.kernel_shape, self.num_kernels)
+        input_tensor = np.array(range(np.prod(self.input_shape) * self.batch_size), dtype=float)
+        input_tensor = input_tensor.reshape(self.batch_size, *self.input_shape)
+        output_tensor = conv.forward(input_tensor)
+        error_tensor = conv.backward(output_tensor)
+        self.assertEqual(error_tensor.shape, (self.batch_size, *self.input_shape))
 
     # def test_1D_backward_size(self):
     #     conv = Conv.Conv([2], (3, 3), self.num_kernels)
@@ -578,15 +578,15 @@ class TestConv(unittest.TestCase):
     #     output_tensor = conv.forward(input_tensor)
     #     self.assertAlmostEqual(np.sum(np.abs(np.squeeze(output_tensor) - input_tensor[:,1,:,:])), 0.)
 
-    # def test_gradient(self):
-    #     np.random.seed(1337)
-    #     input_tensor = np.abs(np.random.random((2, 3, 5, 7)))
-    #     layers = list()
-    #     layers.append(Conv.Conv((1, 1), (3, 3, 3), self.hidden_channels))
-    #     layers.append(Flatten.Flatten())
-    #     layers.append(L2Loss())
-    #     difference = Helpers.gradient_check(layers, input_tensor, self.label_tensor)
-    #     self.assertLessEqual(np.sum(difference), 5e-2)
+    def test_gradient(self):
+        np.random.seed(1337)
+        input_tensor = np.abs(np.random.random((2, 3, 5, 7)))
+        layers = list()
+        layers.append(Conv.Conv((1, 1), (3, 3, 3), self.hidden_channels))
+        layers.append(Flatten.Flatten())
+        layers.append(L2Loss())
+        difference = Helpers.gradient_check(layers, input_tensor, self.label_tensor)
+        self.assertLessEqual(np.sum(difference), 5e-2)
 
     # def test_gradient_weights(self):
     #     np.random.seed(1337)
