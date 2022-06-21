@@ -16,41 +16,32 @@ class Conv(Base.BaseLayer):
         self.gradient_bias = None
 
     def forward(self, input_tensor):
-        N = 1 # number of examples
-        F = 1 # number of filters
-        C = 1 # number of channels
-        H = 5 # height inputs
-        W = 5 # width inputs
-        HH = 3 # height filter
-        WW = 3 # width filter
-        x = np.random.randn(N, C, H, W)
-        w = np.random.randn(F, C, HH, WW)
-        b = np.random.randn(F,)
-        conv_param = {'stride': 1, 'pad': 0}
 
-        # stride = conv_param['stride']
-        pad = conv_param['pad']
+        self.lastShape = input_tensor.shape
 
-        stride = self.stride_shape
+        # N = 1 # number of examples
+        # F = 1 # number of filters
+        # C = 1 # number of channels
+        # H = 5 # height inputs
+        # W = 5 # width inputs
+        # HH = 3 # height filter
+        # WW = 3 # width filter
 
         # dimensions of the output
-        H1 = int(1 + (H + 2 * pad - HH)/stride)
-        W1 = int(1 + (W + 2 * pad - WW)/stride)
-
-        # padding
-        if pad != 0:
-            padded_x = np.pad(x, [(0,), (0,), (pad,), (pad,)], 'constant')
-        else:
-            padded_x = x.copy()
+        h_cnn = np.ceil((input_tensor.shape[2] - self.convolution_shape[0] + 1) / self.stride_shape[0])
+        v_cnn = np.ceil((input_tensor.shape[3] - self.convolution_shape[1] + 1) / self.stride_shape[1])
+        
+        self.x_s = np.zeros((*input_tensor.shape[0:2], int(h_cnn), int(v_cnn)), dtype=int)
+        self.y_s = np.zeros((*input_tensor.shape[0:2], int(h_cnn), int(v_cnn)), dtype=int)
             
-        out = np.zeros((N, F, H1, W1))
-        for n in range(N):
-            for f in range(F):
-                for i in range(H1):
-                    for j in range(W1):
-                        out[n, f, i, j] = np.sum( padded_x[n, :, i*stride:i*stride+HH, j*stride : j*stride + WW] * w[f] ) + b[f]
-        self.lastOut = out
-        return self.lastOut
+        output_tensor = np.zeros((*input_tensor.shape[0:2], int(h_cnn), int(v_cnn)))
+        
+        for n in range(self.x_s.shape[0]):
+            for f in range(self.x_s.shape[1]):
+                for i in range(self.x_s.shape[2]):
+                    for j in range(self.x_s.shape[3]):
+                        output_tensor[n, f, i, j] = np.sum(self.x_s[n, :, i*self.stride:i*self.stride+self.convolution_shape[0], j*self.stride : j*self.stride + self.convolution_shape[1]] * self.weights[f] ) + self.bias[f]
+        return output_tensor
 
     @property
     def optimizer(self):
