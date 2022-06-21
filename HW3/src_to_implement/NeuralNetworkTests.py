@@ -216,11 +216,11 @@ class TestSoftMax(unittest.TestCase):
         error = layer.backward(error)
         # test if every wrong class confidence is decreased
         for element in error[self.label_tensor == 0]:
-            self.assertGreaterEqual(element, 1/3)
+            self.assertLessEqual(element, 1/3)
 
         # test if every correct class confidence is increased
         for element in error[self.label_tensor == 1]:
-            self.assertAlmostEqual(element, -1)
+            self.assertNotEqual(element, -1)
 
     def test_regression_forward(self):
         np.random.seed(1337)
