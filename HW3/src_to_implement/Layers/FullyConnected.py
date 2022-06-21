@@ -1,6 +1,7 @@
 import numpy as np
 from Optimization import Optimizers
 from Layers import Base
+import copy
 
 class FullyConnected(Base.BaseLayer):
     def __init__(self, input_size, output_size):
@@ -22,6 +23,8 @@ class FullyConnected(Base.BaseLayer):
     @optimizer.setter
     def optimizer(self, optimizer):
         self._optimizer = optimizer
+        self._optimizer.weight = copy.deepcopy(optimizer)
+        self._optimizer.bias = copy.deepcopy(optimizer)
 
     def forward(self, input_tensor):
         self.lastIn = input_tensor
@@ -31,9 +34,10 @@ class FullyConnected(Base.BaseLayer):
     def backward(self, error_tensor):
         dx = np.dot(error_tensor, self.weights.T)
         dW = np.dot(self.lastIn.T, error_tensor)
+        db = np.sum(error_tensor, axis = 0)
         if self._optimizer != None:
-            self.weights = self._optimizer.calculate_update(self.weights, dW)
-            self.bias = self._optimizer.calculate_update(self.bias, error_tensor)
+            self.weights = self._optimizer.weight.calculate_update(self.weights, dW)
+            self.bias = self._optimizer.bias.calculate_update(self.bias, db)
        
         self.gradient_bias = error_tensor
         self.gradient_weights = dW
