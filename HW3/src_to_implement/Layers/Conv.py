@@ -79,7 +79,7 @@ class Conv(Base.BaseLayer):
                             else:
                                 output_tensor[n, f, i, j] = 0
         if not self.conv2d:
-            return output_tensor.squeeze(axis = 3)
+            output_tensor = output_tensor.squeeze(axis = 3)
         return output_tensor
 
     @property
@@ -94,7 +94,8 @@ class Conv(Base.BaseLayer):
         
     def backward(self, error_tensor):
         self.error_T = error_tensor.reshape(self.output_shape)
-
+        if not self.conv2d:
+            self.input_tensor = self.input_tensor[:, :, :, np.newaxis]
         # upsampling
         self.up_error_T = np.zeros((self.input_tensor.shape[0], self.num_kernels, *self.input_tensor.shape[2:]))  # num_ker=num chanels
         next_error = np.zeros(self.input_tensor.shape)  # we have the same size of the input
@@ -148,6 +149,8 @@ class Conv(Base.BaseLayer):
         if len(self.convolution_shape) == 2:   #if self.dim1:
             next_error = next_error.reshape(next_error.shape[0],next_error.shape[1], next_error.shape[2])
 
+        if not self.conv2d:
+            next_error = next_error.squeeze(axis = 3)
         return next_error
 
     def initialize(self, weights_initializer, bias_initializer):
