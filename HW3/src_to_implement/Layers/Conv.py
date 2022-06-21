@@ -74,7 +74,6 @@ class Conv(Base.BaseLayer):
         self._optimizer.bias = optimizer
         
     def backward(self, error_tensor):
-        raise NotImplementedError
         self.gradient_weights = np.zeros(self.weights.shape)
         self.gradient_bias = np.zeros(self.bias.shape)
         return_tensor = np.zeros(self.lastShape)
