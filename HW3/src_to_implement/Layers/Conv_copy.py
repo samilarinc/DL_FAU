@@ -24,6 +24,7 @@ import numpy as np
 
 class Conv:
     def __init__(self, stride_shape, convolution_shape, num_kernels):
+        self.trainable = True
         self.stride_shape = stride_shape
         self.conv_shape = convolution_shape # 1D = [c,m], 2D = [c,m,n]
         self.num_kernels = num_kernels
