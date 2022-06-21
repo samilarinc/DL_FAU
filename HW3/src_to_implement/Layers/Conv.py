@@ -61,69 +61,8 @@ class Conv(Base.BaseLayer):
         self._optimizer = optimizer
         
     def backward(self, error_tensor):
+        
 
-        # N = 1 # number of examples
-        # F = 1 # number of filters
-        # C = 1 # number of channels
-        # H = 5 # height inputs
-        # W = 5 # width inputs
-        # HH = 3 # height filter
-        # WW = 3 # width filter
-        # x = np.random.randn(N, C, H, W)
-        # w = np.random.randn(F, C, HH, WW)
-        # b = np.random.randn(F,)
-        # conv_param = {'stride': 1, 'pad': 0}
-
-        # # stride = conv_param['stride']
-        # pad = conv_param['pad']
-
-        # stride = self.stride_shape
-
-        # # dimensions of the output
-        # H1 = int(1 + (H + 2 * pad - HH)/stride)
-        # W1 = int(1 + (W + 2 * pad - WW)/stride)
-
-        # # incoming gradient dL/dY
-        # dout = np.random.randn(N, F, H1, W1)
-
-        # dx = np.zeros(x.shape)
-        # # loop through the number of examples
-        # for n in range(N):
-        #     # hi and wi - looping through x
-        #     for hi in range(H):
-        #         for wi in range(W):
-        #             # i and j - looping through output 
-        #             y_idxs = []
-        #             w_idxs = []
-        #             for i in range(H1):
-        #                 for j in range(W1):
-        #                     # check if within weights limits
-        #                     if ((hi + pad - i * stride) >= 0) and ((hi + pad - i * stride) < HH) and ((wi + pad - j * stride) >= 0) and ((wi + pad - j * stride) < WW):
-        #                         w_idxs.append((hi + pad - i * stride, wi + pad - j * stride))
-        #                         y_idxs.append((i, j))
-
-        #             # loop through filters
-        #             for f in range(F):
-        #                 dx[n, : , hi, wi] += np.sum([w[f, :, widx[0], widx[1]] * dout[n, f, yidx[0], yidx[1]] for widx, yidx in zip(w_idxs, y_idxs)], 0)
-
-        # for f in range(F):
-        #     # looping through channels
-        #     for c in range(C):
-        #         for i in range(HH):
-        #             for j in range(WW):
-        #                 dw[f, c, i ,j] = np.sum(padded_x[:,  c, i: i + H1 * stride : stride, j : j + W1* stride : stride] * dout[:, f, :, :])
-
-
-        dx = np.dot(error_tensor, self.weights.T)
-        dW = np.dot(self.lastIn.T, error_tensor)
-        if self._optimizer != None:
-            self.weights = self._optimizer.calculate_update(self.weights, dW)
-            self.bias = self._optimizer.calculate_update(self.bias, error_tensor)
-       
-        self.gradient_bias = error_tensor
-        self.gradient_weights = dW
-       
-        return dx
 
 
 
@@ -131,3 +70,25 @@ class Conv(Base.BaseLayer):
     def initialize(self, weights_initializer, bias_initializer):
         self.weights = weights_initializer
         self.bias = bias_initializer
+
+    def temp(self):
+        print("Conv backward")
+        print(error_tensor.shape)
+        print(self.lastShape)
+        self.gradient_weights = np.zeros(self.weights.shape)
+        self.gradient_bias = np.zeros(self.bias.shape)
+        np.flip(error_tensor, axis = (1, 2))
+        # dimensions of the error
+        h_error = np.ceil((self.lastShape[2] - self.convolution_shape[1] + 1) / self.stride_shape[0])
+        v_error = np.ceil((self.lastShape[3] - self.convolution_shape[2] + 1) / self.stride_shape[1])
+        for n in range(error_tensor.shape[0]):
+            for f in range(self.num_kernels):
+                for i in range(int(h_error)):
+                    for j in range(int(v_error)):
+                        if ((i * self.stride_shape[0]) + self.convolution_shape[1] <= self.lastShape[2]) and ((j * self.stride_shape[1]) + self.convolution_shape[2] <= self.lastShape[3]):
+                            self.gradient_weights[f, :, :, :] += error_tensor[n, f, i, j] * self.lastShape[1] * self.lastShape[2] * self.lastShape[3]
+                            self.gradient_bias[f] += error_tensor[n, f, i, j]
+                        else:
+                            self.gradient_weights[f, :, :, :] += 0
+                            self.gradient_bias[f] += 0
+        return error_tensor
