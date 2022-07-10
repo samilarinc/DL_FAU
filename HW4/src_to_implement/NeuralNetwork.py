@@ -24,6 +24,7 @@ class NeuralNetwork(object):
     def forward(self):
         data, self.label = copy.deepcopy(self.data_layer.next())
         for layer in self.layers:
+            layer.testing_phase = False
             data = layer.forward(data)
         return self.loss_layer.forward(data, copy.deepcopy(self.label))
 
@@ -49,5 +50,6 @@ class NeuralNetwork(object):
     def test(self, input_tensor):
         self.phase = 'test'
         for layer in self.layers:
+            layer.testing_phase = True
             input_tensor = layer.forward(input_tensor)
         return input_tensor
