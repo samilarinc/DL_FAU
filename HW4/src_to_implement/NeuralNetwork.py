@@ -1,5 +1,15 @@
 import copy
 import numpy as np
+import pickle
+import time 
+
+def save(filename, net):
+    pickle.dump(net, open(filename, 'wb'))
+
+def load(filename, data_layer):
+    net = pickle.load(open(filename, 'rb'))
+    net.data_layer = data_layer
+    return net
 
 class NeuralNetwork(object):
     def __init__(self, optimizer, weights_initializer, bias_initializer):
@@ -13,6 +23,19 @@ class NeuralNetwork(object):
         self.weights_initializer = copy.deepcopy(weights_initializer)
         self.bias_initializer = copy.deepcopy(bias_initializer)
     
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['data_layer']
+        return state
+    
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.phase = 'train'
+        self.loss = list()
+        self.layers = list()
+        self.data_layer = None
+        self.loss_layer = None
+
     @property
     def phase(self):
         return self._phase
@@ -43,9 +66,13 @@ class NeuralNetwork(object):
     def train(self, iterations):
         self.phase = 'train'
         for epoch in range(iterations):
+            start = time.time()
+            print('Epoch: %4d'%(epoch+1), end = ' ')
             loss = self.forward()
             self.loss.append(loss)
             self.backward()
+            stop = time.time()
+            print('%.2f'%(stop-start))
 
     def test(self, input_tensor):
         self.phase = 'test'

@@ -6,7 +6,7 @@ import os.path
 
 batch_size = 50
 mnist = Helpers.MNISTData(batch_size)
-mnist.show_random_training_image()
+# mnist.show_random_training_image()
 
 if os.path.isfile(os.path.join('trained', 'LeNet')):
     net = NeuralNetwork.load(os.path.join('trained', 'LeNet'), mnist)
