@@ -6,8 +6,9 @@ class Sigmoid(Base.BaseLayer):
         super().__init__()
 
     def forward(self, input_tensor):
-        return 1 / (1 + np.exp(-input_tensor))
+        self.activ = 1 / (1 + np.exp(-input_tensor))
+        return self.activ
 
     def backward(self, error_tensor):
-        temp = self.forward(error_tensor)
-        return temp * (1 - temp)
+        # temp = self.forward(error_tensor)
+        return self.activ * (1 - self.activ) * error_tensor
