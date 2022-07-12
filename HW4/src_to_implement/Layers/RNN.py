@@ -38,29 +38,30 @@ class RNN(Base.BaseLayer):
 
         y_t = np.zeros((self.batch_size, self.output_size))
 
+        # concatenating x,ht-1 and 1 to do forwarding to obtain new hidden state ht
+        # 1: for t from 1 to T do:
+        # 2:    ut = W hh · h t − 1 + W xh · x t + b h --> h t = tanh (x̃ t · W h )
+        # 3:    h t = tanh ( u t )
+        # 4:    o t = W hy · h t + b y
+        # 5:    ŷ t = σ( o t )
+
         for b in range(self.batch_size):
             hidden_ax = self.h_t[b][np.newaxis, :]
             input_ax = input_tensor[b][np.newaxis, :]
+            # x̃_t:
             input_new = np.concatenate((hidden_ax, input_ax), axis = 1)
 
             self.h_mem.append(input_new)
 
             w_t = self.FC_h.forward(input_new)
             input_new = np.concatenate((np.expand_dims(self.h_t[b], 0), np.expand_dims(input_tensor[b], 0)), axis=1)
-            self.h_t[b+1] = TanH().forward(w_t)
+            self.h_t[b+1] = TanH().forward(w_t) # h t = tanh (x̃ t · W h )
             y_t[b] = (self.FC_y.forward(self.h_t[b + 1][np.newaxis, :]))
         
         self.prev_h_t = self.h_t[-1]
-        # print(self.h_t.shape)
         self.input_tensor = input_tensor
 
         return y_t
-        # self.X = X
-        # self.Y = np.zeros_like(X)
-        # for i in range(X.shape[0]):
-        #     self.Y[i] = self.hidden_state
-        #     self.hidden_state = self.hidden_state + X[i]
-        # return self.Y
 
     def backward(self, error_tensor):
 
