@@ -75,6 +75,11 @@ class RNN(Base.BaseLayer):
         grad_tanh = 1-self.h_t[1::] ** 2
         hidden_error = np.zeros((1, self.hidden_size))
 
+        # 1: for t from 1 to T do:
+        # 2:    Run RNN for one step, computing h_t and y_t
+        # 3:    if t mod k_1 == 0:
+        # 4:        Run BPTT from t down to t-k_2
+        
         for b in reversed(range(self.batch_size)):
             yh_error = self.FC_y.backward(error_tensor[b][np.newaxis, :])
             self.FC_y.input_tensor = np.hstack((self.h_t[b+1], 1))[np.newaxis, :]
