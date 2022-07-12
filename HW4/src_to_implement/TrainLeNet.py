@@ -14,17 +14,16 @@ else:
     net = build()
     net.data_layer = mnist
 
-net.train(300)
+    net.train(300)
 
-NeuralNetwork.save(os.path.join('trained', 'LeNet'), net)
+    NeuralNetwork.save(os.path.join('trained', 'LeNet'), net)
 
-plt.figure('Loss function for training LeNet on the MNIST dataset')
-plt.plot(net.loss, '-x')
-plt.show()
+    plt.figure('Loss function for training LeNet on the MNIST dataset')
+    plt.plot(net.loss, '-x')
+    plt.show()
 
 data, labels = net.data_layer.get_test_set()
 
-results = net.test(data)
-
-accuracy = Helpers.calculate_accuracy(results, labels)
+results = net.test(data[:500])
+accuracy = Helpers.calculate_accuracy(results, labels[:500])
 print('\nOn the MNIST dataset, we achieve an accuracy of: ' + str(accuracy * 100) + '%')

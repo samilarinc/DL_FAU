@@ -47,12 +47,8 @@ class Conv(Base.BaseLayer):
             
         output_tensor = np.zeros((input_tensor.shape[0], self.num_kernels, int(h_cnn), int(v_cnn)))
         self.output_shape = output_tensor.shape
-        divider = input_tensor.shape[0] // 100
         # loop through the number of examples
         for n in range(input_tensor.shape[0]):
-            if self.testing_phase:
-                if n % divider == 0:
-                    print("%d"%(n//divider), end = '\r')
             # loop through the number of filters
             for f in range(self.num_kernels):
                     # loop through the height of the output
@@ -67,8 +63,6 @@ class Conv(Base.BaseLayer):
                                 output_tensor[n, f, i, j] = 0
         if not self.conv2d:
             output_tensor = output_tensor.squeeze(axis = 3) # just to solve error in 1d case
-        if self.testing_phase:
-            print()
         return output_tensor
 
     @property

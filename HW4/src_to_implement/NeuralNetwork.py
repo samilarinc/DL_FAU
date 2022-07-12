@@ -29,12 +29,7 @@ class NeuralNetwork(object):
         return state
     
     def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.phase = 'train'
-        self.loss = list()
-        self.layers = list()
-        self.data_layer = None
-        self.loss_layer = None
+        self.__dict__ = state
 
     @property
     def phase(self):
@@ -77,7 +72,6 @@ class NeuralNetwork(object):
     def test(self, input_tensor):
         self.phase = 'test'
         for layer in self.layers:
-            print(layer.__class__.__name__)
             layer.testing_phase = True
             input_tensor = layer.forward(input_tensor)
         return input_tensor
