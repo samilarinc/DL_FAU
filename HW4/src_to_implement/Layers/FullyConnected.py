@@ -50,5 +50,12 @@ class FullyConnected(Base.BaseLayer):
         self.weights = weights_initializer.initialize(self.weights.shape, self.input_size, self.output_size)
         self.bias = bias_initializer.initialize(self.bias.shape, 1, self.output_size)
 
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, weights):
+        self._weights = weights
     
     

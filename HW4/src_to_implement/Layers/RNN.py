@@ -14,6 +14,7 @@ class RNN(Base.BaseLayer):
         self.output_size = output_size
         self.FC_h = FullyConnected(hidden_size + input_size, hidden_size)
         self.FC_y = FullyConnected(hidden_size, output_size)
+        self.gradient_weights_n = np.zeros((self.hidden_size + self.input_size + 1, self.hidden_size))
         self.weights_y = None
         self.weights_h = None
         self.weights = self.FC_h.weights
@@ -68,7 +69,7 @@ class RNN(Base.BaseLayer):
         self.gradient_weights_y = np.zeros((self.hidden_size + 1, self.output_size))
         self.gradient_weights_h = np.zeros((self.hidden_size+self.input_size+1, self.hidden_size))
 
-        count = 1
+        count = 0
 
         grad_tanh = 1-self.h_t[1::] ** 2
         hidden_error = np.zeros((1, self.hidden_size))
@@ -90,15 +91,15 @@ class RNN(Base.BaseLayer):
             if count <= self.bptt:
                 self.weights_y = self.FC_y.weights
                 self.weights_h = self.FC_h.weights
-                self.gradient_weights
+                self.gradient_weights_y = self.FC_y.gradient_weights
+                self.gradient_weights_h = self.FC_h.gradient_weights
             count += 1
 
-        if self.optimizer is not None and self.weights_y is not None:
+        if self.optimizer is not None:
             self.weights_y = self.optimizer.calculate_update(self.weights_y, self.gradient_weights_y)
             self.weights_h = self.optimizer.calculate_update(self.weights_h, self.gradient_weights_h)
-            FullyConnected(self.hidden_size, self.output_size).setter(self.weights_y)      # .set_weights(self.weights_y)
-            FullyConnected(self.hidden_size + self.input_size, self.hidden_size).setter(self.weights_h)      # .set_weights(self.weights_h)
-
+            self.FC_y.weights = self.weights_y
+            self.FC_h.weights = self.weights_h
         return self.out_error
 
     @property
@@ -117,10 +118,6 @@ class RNN(Base.BaseLayer):
     def memorize(self, value):
         self._memorize = value
 
-    @property
-    def gradient_weights(self):
-        return self.gradient_weights_h
-
     def initialize(self, weights_initializer, bias_initializer):
         self.FC_y.initialize(weights_initializer, bias_initializer)
         self.FC_h.initialize(weights_initializer, bias_initializer)
@@ -132,3 +129,11 @@ class RNN(Base.BaseLayer):
     @weights.setter
     def weights(self, weights):
         self._weights = weights
+
+    @property
+    def gradient_weights(self):
+        return self.gradient_weights_n
+
+    @gradient_weights.setter
+    def gradient_weights(self, gradient_weights):
+        self.FC_y.gradient_weights = gradient_weights
