@@ -14,6 +14,9 @@ class RNN(Base.BaseLayer):
         self.output_size = output_size
         self.FC_h = FullyConnected(hidden_size + input_size, hidden_size)
         self.FC_y = FullyConnected(hidden_size, output_size)
+        self.weights_y = None
+        self.weights_h = None
+        self.weights = self.FC_h.weights
         self.tan_h = TanH()
         self.bptt = 0
         self.h_t = None
@@ -25,7 +28,7 @@ class RNN(Base.BaseLayer):
     def forward(self, input_tensor):
         self.batch_size = input_tensor.shape[0]
         if self._memorize:
-            if self.h_t == None:
+            if self.h_t is None:
                 self.h_t = np.zeros((self.batch_size + 1, self.hidden_size))
             else:
                 self.h_t[0] = self.prev_h_t
@@ -83,15 +86,14 @@ class RNN(Base.BaseLayer):
 
             con = np.hstack((self.h_t[b], self.input_tensor[b],1))
             self.FC_h.input_tensor = con[np.newaxis, :]
-
-            print(count, "", self.bptt)
+            # print(count, "", self.bptt)
             if count <= self.bptt:
-                self.weights_y = self.FC_y.getter()
-                self.weights_h = self.FC_h.getter()
-                self.gradient_weights()
+                self.weights_y = self.FC_y.weights
+                self.weights_h = self.FC_h.weights
+                self.gradient_weights
             count += 1
 
-        if self.optimizer != None:
+        if self.optimizer is not None and self.weights_y is not None:
             self.weights_y = self.optimizer.calculate_update(self.weights_y, self.gradient_weights_y)
             self.weights_h = self.optimizer.calculate_update(self.weights_h, self.gradient_weights_h)
             FullyConnected(self.hidden_size, self.output_size).setter(self.weights_y)      # .set_weights(self.weights_y)
@@ -99,11 +101,13 @@ class RNN(Base.BaseLayer):
 
         return self.out_error
 
-    def setter(self, optimizer):
-        self._optimizer = copy.deepcopy(optimizer)
-
-    def getter(self):
+    @property
+    def optimizer(self):
         return self._optimizer
+    
+    @optimizer.setter
+    def optimizer(self, optimizer):
+        self._optimizer = copy.deepcopy(optimizer)
 
     @property
     def memorize(self):
@@ -117,8 +121,14 @@ class RNN(Base.BaseLayer):
     def gradient_weights(self):
         return self.gradient_weights_h
 
-    optimizer = property(getter, setter)
-
     def initialize(self, weights_initializer, bias_initializer):
         self.FC_y.initialize(weights_initializer, bias_initializer)
         self.FC_h.initialize(weights_initializer, bias_initializer)
+
+    @property
+    def weights(self):
+        return self._weights
+    
+    @weights.setter
+    def weights(self, weights):
+        self._weights = weights

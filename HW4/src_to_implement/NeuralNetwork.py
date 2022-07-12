@@ -77,6 +77,7 @@ class NeuralNetwork(object):
     def test(self, input_tensor):
         self.phase = 'test'
         for layer in self.layers:
+            print(layer.__class__.__name__)
             layer.testing_phase = True
             input_tensor = layer.forward(input_tensor)
         return input_tensor

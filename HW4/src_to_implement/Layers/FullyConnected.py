@@ -26,12 +26,6 @@ class FullyConnected(Base.BaseLayer):
         self._optimizer.weight = copy.deepcopy(optimizer)
         self._optimizer.bias = copy.deepcopy(optimizer)
 
-    def setter(self, optimizer):
-        self._optimizer = optimizer
-
-    def getter(self):
-        return self._optimizer
-
     def forward(self, input_tensor):
         self.lastIn = input_tensor
         self.lastOut = np.dot(input_tensor, self.weights) + self.bias
