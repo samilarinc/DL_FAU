@@ -41,10 +41,14 @@ class NeuralNetwork(object):
 
     def forward(self):
         data, self.label = copy.deepcopy(self.data_layer.next())
+        reg_loss = 0
         for layer in self.layers:
             layer.testing_phase = False
             data = layer.forward(data)
-        return self.loss_layer.forward(data, copy.deepcopy(self.label))
+            if self.optimizer.regularizer is not None:
+                reg_loss += self.optimizer.regularizer.norm(layer.weights)
+        glob_loss = self.loss_layer.forward(data, copy.deepcopy(self.label))
+        return glob_loss + reg_loss
 
     def backward(self):
         y = copy.deepcopy(self.label)
@@ -62,12 +66,12 @@ class NeuralNetwork(object):
         self.phase = 'train'
         for epoch in range(iterations):
             start = time.time()
-            print('Epoch: %4d'%(epoch+1), end = ' ')
+            # print('Epoch: %4d'%(epoch+1), end = ' ')
             loss = self.forward()
             self.loss.append(loss)
             self.backward()
             stop = time.time()
-            print('%.2f'%(stop-start))
+            # print('%.2f'%(stop-start))
 
     def test(self, input_tensor):
         self.phase = 'test'

@@ -13,7 +13,7 @@ class BatchNormalization(Base.BaseLayer):
         self.moving_var = None
         self.decay = 0.8
     
-    def initialize(self):
+    def initialize(self, weights_initializer=None, bias_initializer=None):
         self.gamma = np.ones(self.channels)
         self.beta = np.zeros(self.channels)
 
