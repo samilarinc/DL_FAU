@@ -9,13 +9,13 @@ class ResBlock(nn.Module):
         super(ResBlock, self).__init__()
         self.shortcut = None
         if in_channels != out_channels:
-            self.shortcut = nn.LazyConv2d(out_channels, 1, stride=stride)
+            self.shortcut = nn.Conv2d(in_channels, out_channels, 1, stride=stride)
         self.NN = nn.Sequential(
-            nn.LazyConv2d(out_channels, 3, stride, 1),
-            nn.LazyBatchNorm2d(),
+            nn.Conv2d(in_channels, out_channels, 3, stride, 1),
+            nn.BatchNorm2d(out_channels),
             nn.ReLU(),
-            nn.LazyConv2d(out_channels, 3, padding=1),
-            nn.LazyBatchNorm2d()
+            nn.Conv2d(out_channels, out_channels, 3, padding=1),
+            nn.BatchNorm2d(out_channels)
         )
         self.ReLU = nn.ReLU()
 
@@ -29,7 +29,7 @@ class ResNet(nn.Module):
     def __init__(self):
         super(ResNet, self).__init__()
         self.NN = nn.Sequential(nn.Conv2d(3, 64, 7, 2),
-                                nn.LazyBatchNorm2d(),
+                                nn.BatchNorm2d(64),
                                 nn.ReLU(),
                                 nn.MaxPool2d(3, 2),
                                 ResBlock(64, 64, 1),
@@ -38,7 +38,7 @@ class ResNet(nn.Module):
                                 ResBlock(256, 512, 2),
                                 nn.AdaptiveAvgPool2d((1,1)),
                                 nn.Flatten(),
-                                nn.LazyLinear(2),
+                                nn.Linear(512, 2),
                                 nn.Sigmoid()
         )
 
