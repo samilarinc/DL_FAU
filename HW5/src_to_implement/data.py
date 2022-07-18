@@ -15,12 +15,14 @@ class ChallengeDataset(Dataset):
     def __init__(self, data, mode):
         self.data = data
         self.train = (mode == 'train')
-        self._transform = tv.transforms.Compose([tv.transforms.ToPILImage(),
-                                                tv.transforms.ToTensor(),
-                                                tv.transforms.Normalize(train_mean, train_std),
-                                                tv.transforms.RandomHorizontalFlip(p=0.3),
-                                                tv.transforms.RandomVerticalFlip(p=0.3)
-                                                ])
+        TF = tv.transforms
+        self._transform = TF.Compose([  
+                                    TF.ToPILImage(),
+                                    TF.ToTensor(),
+                                    TF.Normalize(train_mean, train_std),
+                                    TF.RandomHorizontalFlip(p=0.3),
+                                    TF.RandomVerticalFlip(p=0.3)
+                                    ])
 
     def __len__(self):
         return len(self.data)

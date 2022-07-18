@@ -1,3 +1,5 @@
+from cProfile import label
+import numpy as np
 import torch as t
 from sklearn.metrics import f1_score
 from tqdm.autonotebook import tqdm
@@ -60,7 +62,7 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out = self._model(x)
-        loss = self._crit(out, y)
+        loss = self._crit(out, y.float())
         loss.backward()
         self._optim.step()
         return loss.item()
@@ -68,15 +70,15 @@ class Trainer:
         
     
     def val_test_step(self, x, y):
-        
         # predict
         # propagate through the network and calculate the loss and predictions
         # return the loss and the predictions
         #TODO
         out = self._model(x)
-        loss = self._crit(out, y)
-        pred = t.argmax(out, dim=1)
-        return loss.item(), pred.item()
+        loss = self._crit(out, y.float())
+        out = out.detach().cpu().numpy()
+        pred = np.array(out > 0.5).astype(int)
+        return loss.item(), pred
         
     def train_epoch(self):
         # set training mode
@@ -109,7 +111,6 @@ class Trainer:
         self._model.eval()
         with t.no_grad():
             avg_loss = 0
-            avg_metrics = 0
             preds = []
             labels = []
             for x, y in self._val_test_dl:
@@ -118,10 +119,14 @@ class Trainer:
                     y = y.cuda()
                 loss, pred = self.val_test_step(x, y)
                 avg_loss += loss / len(self._val_test_dl)
-                preds.append(pred)
-                labels.append(y)
-            avg_metrics = f1_score(labels, preds, average='micro')
-        return avg_loss, avg_metrics
+                if self._cuda:
+                    y = y.cpu()
+                pred = pred
+                preds.extend(pred)
+                labels.extend(y.numpy())
+            preds, labels = np.array(preds), np.array(labels)
+            score = f1_score(labels, preds, average='micro')
+        return avg_loss, score
         
     
     def fit(self, epochs=-1):
@@ -134,7 +139,6 @@ class Trainer:
         epoch_n = 0
         
         while True:
-      
             # stop by epoch number
             # train for a epoch and then calculate the loss and metrics on the validation set
             # append the losses to the respective lists
@@ -144,6 +148,7 @@ class Trainer:
             #TODO
             if epoch_n == epochs:
                 break
+            print('Epoch: %3d'%(epoch_n+1))
             train_loss = self.train_epoch()
             val_loss, val_metric = self.val_test()
             train_losses.append(train_loss)
@@ -155,5 +160,6 @@ class Trainer:
                     if val_losses[-self._early_stopping_patience] - val_losses[-1] > 0.001:
                         break
             epoch_n += 1
+            print('\tTrain Loss: %.4f\tVal Loss: %.4f\tVal Metric: %.4f'%(train_loss, val_loss, val_metric))
         return train_losses, val_losses, val_metrics
         
