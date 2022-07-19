@@ -62,7 +62,7 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out = self._model(x)
-        loss = self._crit(out, y.float())
+        loss = self._crit(out, t.squeeze(y).float())
         loss.backward()
         self._optim.step()
         return loss.item()
@@ -75,10 +75,10 @@ class Trainer:
         # return the loss and the predictions
         #TODO
         out = self._model(x)
-        loss = self._crit(out, y.float())
-        out = out.detach().cpu().numpy()
-        pred = np.array(out > 0.5).astype(int)
-        return loss.item(), pred
+        loss = self._crit(out, t.squeeze(y).float())
+        # out = out.detach().cpu().numpy()
+        # pred = np.array(out > 0.5).astype(int)
+        return loss.item(), out
         
     def train_epoch(self):
         # set training mode
@@ -111,8 +111,8 @@ class Trainer:
         self._model = self._model.eval()
         with t.no_grad():
             avg_loss = 0
-            preds = []
-            labels = []
+            preds = None
+            labels = None
             for x, y in self._val_test_dl:
                 if self._cuda:
                     x = x.cuda()
@@ -121,11 +121,13 @@ class Trainer:
                 avg_loss += loss / len(self._val_test_dl)
                 if self._cuda:
                     y = y.cpu()
-                pred = pred
-                preds.extend(pred)
-                labels.extend(y.numpy())
-            preds, labels = np.array(preds), np.array(labels)
-            score = f1_score(labels, preds, average='weighted')
+                # pred = pred
+                preds = t.cat((preds, pred), 0) if preds is not None else pred
+                labels = t.cat((labels, y), 0) if labels is not None else y
+                # labels.extend(y.numpy())
+            squeeze_preds = t.squeeze(preds.cpu().round())
+            # preds, labels = np.array(preds), np.array(labels)
+            score = f1_score(t.squeeze(labels.cpu()), squeeze_preds, average='weighted')
         return avg_loss, score
         
     
