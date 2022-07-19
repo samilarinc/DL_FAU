@@ -5,25 +5,58 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class ResBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride):
-        super(ResBlock, self).__init__()
-        self.shortcut = None
-        if in_channels != out_channels:
-            self.shortcut = nn.Conv2d(in_channels, out_channels, 1, stride=stride)
-        self.NN = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, stride, 1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-            nn.Conv2d(out_channels, out_channels, 3, padding=1),
-            nn.BatchNorm2d(out_channels)
-        )
-        self.ReLU = nn.ReLU()
 
-    def forward(self, x):
-        Y = self.NN(x)
-        if self.shortcut is not None:
-            x = self.shortcut(x)
-        return self.ReLU(x + Y)
+    def __init__(self, in_channels, out_channels, stride_shape=1):
+        super(ResBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride_shape, padding=1)
+        self.batch_norm1 = nn.BatchNorm2d(out_channels)
+        self.relu_1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.batch_norm2 = nn.BatchNorm2d(out_channels)
+        self.residual_conv = True
+        self.conv1X1 = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride_shape)
+        if in_channels == out_channels and stride_shape == 1:
+            self.residual_conv = False
+        else:
+            self.residual_conv = True
+
+        self.batch_norm3 = nn.BatchNorm2d(out_channels)
+        self.relu_3 = nn.ReLU()
+        self.seq = nn.Sequential(self.conv1, self.batch_norm1, self.relu_1, self.conv2, self.batch_norm2)
+        self.residual = None
+        self.cnt = 0
+
+    def forward(self, input_tensor):
+        self.residual = input_tensor
+        output_tensor = self.seq(input_tensor)
+        if self.residual_conv:
+            #self.cnt +=1
+            self.residual = self.conv1X1(self.residual)
+            #print(self.cnt)
+        # Now normalize the residual
+        self.residual = self.batch_norm3(self.residual)
+        output_tensor += self.residual
+        output_tensor = self.relu_3(output_tensor)
+        return output_tensor
+    # def __init__(self, in_channels, out_channels, stride):
+    #     super(ResBlock, self).__init__()
+    #     self.shortcut = None
+    #     if in_channels != out_channels:
+    #         self.shortcut = nn.Conv2d(in_channels, out_channels, 1, stride=stride)
+    #     self.NN = nn.Sequential(
+    #         nn.Conv2d(in_channels, out_channels, 3, stride, 1),
+    #         nn.BatchNorm2d(out_channels),
+    #         nn.ReLU(),
+    #         nn.Conv2d(out_channels, out_channels, 3, padding=1),
+    #         nn.BatchNorm2d(out_channels)
+    #     )
+    #     self.ReLU = nn.ReLU()
+
+    # def forward(self, x):
+    #     Y = self.NN(x)
+    #     if self.shortcut is not None:
+    #         x = self.shortcut(x)
+    #     return self.ReLU(x + Y)
 
 class ResNet(nn.Module):
     def __init__(self):
