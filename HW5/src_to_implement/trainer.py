@@ -75,11 +75,10 @@ class Trainer:
         # return the loss and the predictions
         #TODO
         out = self._model(x)
-        loss = self._crit(out, t.squeeze(y).float())
+        loss = self._crit(out, y.float())
         out = out.detach().cpu().numpy()
-        # out = out.detach().cpu().numpy()
-        # pred = np.array(out > 0.5).astype(int)
-        return loss.item(), out
+        pred = np.array(out > 0.5).astype(int)
+        return loss.item(), pred
         
     def train_epoch(self):
         # set training mode
@@ -126,8 +125,7 @@ class Trainer:
                 preds.extend(pred)
                 labels.extend(y.numpy())
             preds, labels = np.array(preds), np.array(labels)
-            sq_pred = (preds.round())
-            score = f1_score(labels, sq_pred, average='weighted')
+            score = f1_score(labels, preds, average='weighted')
         return avg_loss, score
         
     
