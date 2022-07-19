@@ -75,8 +75,8 @@ class Trainer:
         # return the loss and the predictions
         #TODO
         out = self._model(x)
-        loss = self._crit(out, y.float())
         out = out.detach().cpu().numpy()
+        loss = self._crit(out, y.float())
         # pred = np.array(out > 0.5).astype(int)
         return loss.item(), out
 
