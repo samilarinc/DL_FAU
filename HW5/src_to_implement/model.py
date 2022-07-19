@@ -59,23 +59,55 @@ class ResBlock(nn.Module):
     #     return self.ReLU(x + Y)
 
 class ResNet(nn.Module):
+#     def __init__(self):
+#         super(ResNet, self).__init__()
+#         self.NN = nn.Sequential(nn.Conv2d(3, 64, 7, 2),
+#                                 nn.BatchNorm2d(64),
+#                                 nn.ReLU(),
+#                                 nn.MaxPool2d(3, 2),
+#                                 ResBlock(64, 64, 1),
+#                                 ResBlock(64, 128, 2),
+#                                 ResBlock(128, 256, 2),
+#                                 ResBlock(256, 512, 2),
+#                                 nn.AdaptiveAvgPool2d((1,1)),
+#                                 nn.Flatten(),
+#                                 nn.Linear(512, 2),
+#                                 nn.Sigmoid()
+#         )
+
+#     def forward(self, x):
+#         return self.NN(x)
+        
+# # summary(ResNet().cuda(), (3, 300, 300))
+
     def __init__(self):
         super(ResNet, self).__init__()
-        self.NN = nn.Sequential(nn.Conv2d(3, 64, 7, 2),
-                                nn.BatchNorm2d(64),
-                                nn.ReLU(),
-                                nn.MaxPool2d(3, 2),
-                                ResBlock(64, 64, 1),
-                                ResBlock(64, 128, 2),
-                                ResBlock(128, 256, 2),
-                                ResBlock(256, 512, 2),
-                                nn.AdaptiveAvgPool2d((1,1)),
-                                nn.Flatten(),
-                                nn.Linear(512, 2),
-                                nn.Sigmoid()
+        self.seq1 = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3),
+            nn.BatchNorm2d(num_features=64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2)
         )
 
-    def forward(self, x):
-        return self.NN(x)
-        
-# summary(ResNet().cuda(), (3, 300, 300))
+        self.seq2 = nn.Sequential(
+            ResBlock(in_channels=64, out_channels=64),
+            ResBlock(in_channels=64, out_channels=128, stride_shape=2),
+            ResBlock(in_channels=128, out_channels=256, stride_shape=2),
+            nn.Dropout(p=0.5),
+            ResBlock(in_channels=256, out_channels=512, stride_shape=2)
+        )
+
+        self.seq3 = nn.Sequential(
+            nn.AvgPool2d(kernel_size=10),
+            Flatten(),
+            nn.Dropout(p=0.5),
+            nn.Linear(in_features=512, out_features=2),
+            nn.Sigmoid()
+        )
+
+    def forward(self, input_tensor):
+        output_tensor = self.seq1(input_tensor)
+        output_tensor = self.seq2(output_tensor)
+        output_tensor = self.seq3(output_tensor)
+        return output_tensor
+
