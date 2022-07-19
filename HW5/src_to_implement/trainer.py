@@ -127,7 +127,7 @@ class Trainer:
                 labels.extend(y.numpy())
             preds, labels = np.array(preds), np.array(labels)
             sq_pred = (preds.round())
-            score = f1_score(labels, sq_pred, average='weighted')
+            score = f1_score(labels, sq_pred, average='micro')
         return avg_loss, score
         
     
