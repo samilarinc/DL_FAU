@@ -29,7 +29,8 @@ model = model.ResNet()
 # create an object of type Trainer and set its early stopping criterion
 # TODO
 crit = t.nn.BCELoss()
-optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
+# optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
+optimizer = t.optim.SGD(model.parameters(), lr=0.0001, momentum = 0.9)
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, early_stopping_patience=25)
 
 # go, go, go... call fit on trainer
