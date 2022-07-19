@@ -75,11 +75,11 @@ class Trainer:
         # return the loss and the predictions
         #TODO
         out = self._model(x)
-        out = out.detach().cpu().numpy()
-        loss = self._crit(out, y.float())
+        loss = self._crit(out, t.squeeze(y).float())
+        # out = out.detach().cpu().numpy()
         # pred = np.array(out > 0.5).astype(int)
         return loss.item(), out
-
+        
     def train_epoch(self):
         # set training mode
         # iterate through the training set
