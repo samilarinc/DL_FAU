@@ -87,7 +87,7 @@ class Trainer:
         # perform a training step
         # calculate the average loss for the epoch and return it
         #TODO
-        self._model.train()
+        self._model = self._model.train()
         avg_loss = 0
         for x, y in self._train_dl:
             if self._cuda:
@@ -108,7 +108,7 @@ class Trainer:
         # calculate the average loss and average metrics of your choice. You might want to calculate these metrics in designated functions
         # return the loss and print the calculated metrics
         #TODO
-        self._model.eval()
+        self._model = self._model.eval()
         with t.no_grad():
             avg_loss = 0
             preds = []
