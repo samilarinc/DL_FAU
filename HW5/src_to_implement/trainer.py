@@ -76,7 +76,7 @@ class Trainer:
         #TODO
         out = self._model(x)
         loss = self._crit(out, t.squeeze(y).float())
-        out = out.detach().cpu().numpy().astype(int)
+        out = out.detach().cpu().numpy()
         # out = out.detach().cpu().numpy()
         # pred = np.array(out > 0.5).astype(int)
         return loss.item(), out
@@ -126,7 +126,8 @@ class Trainer:
                 preds.extend(pred)
                 labels.extend(y.numpy())
             preds, labels = np.array(preds), np.array(labels)
-            score = f1_score(labels, preds, average='micro')
+            sq_pred = t.squeeze(preds.round())
+            score = f1_score(t.squeeze(labels.cpu()), sq_pred, average='weighted')
         return avg_loss, score
         
     
