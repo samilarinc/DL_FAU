@@ -155,10 +155,10 @@ class Trainer:
             val_losses.append(val_loss)
             val_metrics.append(val_metric)
 
-            if self._early_stopping_patience > 0:
-                if len(val_losses) > self._early_stopping_patience:
-                    if val_losses[-1] > val_losses[-self._early_stopping_patience-1]:
-                        break
+            # if self._early_stopping_patience > 0:
+            #     if len(val_losses) > self._early_stopping_patience:
+            #         if val_losses[-1] > val_losses[-self._early_stopping_patience-1]:
+            #             break
             self.save_checkpoint(epoch_n)
             # if self._early_stopping_patience > 0:
             #     if len(val_losses) > self._early_stopping_patience:
