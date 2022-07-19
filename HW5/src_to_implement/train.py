@@ -29,11 +29,11 @@ model = model.ResNet()
 # create an object of type Trainer and set its early stopping criterion
 # TODO
 crit = t.nn.BCELoss()
-optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
+optimizer = t.optim.Adam(model.parameters(), lr=0.001)
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, early_stopping_patience=25)
 
 # go, go, go... call fit on trainer
-res = trainer.fit(epochs=50)
+res = trainer.fit(epochs=100)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')
