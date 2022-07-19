@@ -17,8 +17,8 @@ train_tab, val_tab = train_test_split(tab, test_size=0.2, random_state=31)
 
 # set up data loading for the training and validation set each using t.utils.data.DataLoader and ChallengeDataset objects
 # TODO
-train_dl = t.utils.data.DataLoader(ChallengeDataset(train_tab, 'train'), batch_size=8)
-val_dl = t.utils.data.DataLoader(ChallengeDataset(val_tab, 'val'), batch_size=8)
+train_dl = t.utils.data.DataLoader(ChallengeDataset(train_tab, 'train'), batch_size=32, shuffle = True)
+val_dl = t.utils.data.DataLoader(ChallengeDataset(val_tab, 'val'), batch_size=32)
 
 # create an instance of our ResNet model
 # TODO
@@ -29,11 +29,11 @@ model = model.ResNet()
 # create an object of type Trainer and set its early stopping criterion
 # TODO
 crit = t.nn.BCELoss()
-optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
-trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True)
+optimizer = t.optim.Adam(model.parameters(), lr=0.001, weight_decay = 0.135)
+trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, early_stopping_patience=25)
 
 # go, go, go... call fit on trainer
-res = trainer.fit(epochs=100)
+res = trainer.fit(epochs=50)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')

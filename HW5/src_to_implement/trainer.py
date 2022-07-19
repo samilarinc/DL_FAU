@@ -154,11 +154,16 @@ class Trainer:
             train_losses.append(train_loss)
             val_losses.append(val_loss)
             val_metrics.append(val_metric)
-            self.save_checkpoint(epoch_n)
+
             if self._early_stopping_patience > 0:
                 if len(val_losses) > self._early_stopping_patience:
-                    if val_losses[-self._early_stopping_patience] - val_losses[-1] > 0.001:
+                    if val_losses[-1] > val_losses[-self._early_stopping_patience-1]:
                         break
+            self.save_checkpoint(epoch_n)
+            # if self._early_stopping_patience > 0:
+            #     if len(val_losses) > self._early_stopping_patience:
+            #         if val_losses[-self._early_stopping_patience] - val_losses[-1] > 0.001:
+            #             break
             epoch_n += 1
             print('\tTrain Loss: %.4f\tVal Loss: %.4f\tVal Metric: %.4f'%(train_loss, val_loss, val_metric))
         return train_losses, val_losses, val_metrics
