@@ -4,6 +4,17 @@ import torch.nn as nn
 import warnings
 warnings.filterwarnings("ignore")
 
+
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+        self.batch_dim = None
+
+    def forward(self, input_tensor):
+        self.batch_dim = input_tensor.shape[0]
+        return input_tensor.reshape(self.batch_dim, -1)
+
+
 class ResBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, stride_shape=1):
