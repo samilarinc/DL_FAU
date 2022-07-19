@@ -76,7 +76,7 @@ class Trainer:
         #TODO
         out = self._model(x)
         loss = self._crit(out, t.squeeze(y).float())
-        # out = out.detach().cpu().numpy()
+        out = out.detach().cpu().numpy()
         # pred = np.array(out > 0.5).astype(int)
         return loss.item(), out
         
