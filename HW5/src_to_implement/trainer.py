@@ -126,8 +126,8 @@ class Trainer:
                 preds.extend(pred)
                 labels.extend(y.numpy())
             preds, labels = np.array(preds), np.array(labels)
-            sq_pred = t.squeeze(preds.round())
-            score = f1_score(t.squeeze(labels.cpu()), sq_pred, average='weighted')
+            sq_pred = (preds.round())
+            score = f1_score(labels, sq_pred, average='weighted')
         return avg_loss, score
         
     
