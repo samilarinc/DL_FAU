@@ -31,8 +31,8 @@ class Trainer:
     def save_checkpoint(self, epoch):
         t.save({'state_dict': self._model.state_dict()}, 'checkpoints/checkpoint.ckp')
     
-    def restore_checkpoint(self, epoch_n):
-        ckp = t.load('checkpoints/checkpoint_{:03d}.ckp'.format(epoch_n), 'cuda' if self._cuda else None)
+    def restore_checkpoint(self, epoch_n, path='checkpoints'):
+        ckp = t.load(f'{path}/checkpoint.ckp', 'cuda' if self._cuda else None)
         self._model.load_state_dict(ckp['state_dict'])
         
     def save_onnx(self, fn):

@@ -27,9 +27,9 @@ class ChallengeDataset(Dataset):
         self.train_transform = TF.Compose([  
                                     TF.ToPILImage(),
                                     TF.ToTensor(),
-                                    TF.Normalize(train_mean, train_std),
-                                    TF.RandomHorizontalFlip(p=0.3),
-                                    TF.RandomVerticalFlip(p=0.3)
+                                    TF.Normalize(train_mean, train_std)
+                                    # TF.RandomHorizontalFlip(p=0.3),
+                                    # TF.RandomVerticalFlip(p=0.3)
                                     ])
 
     def __len__(self):
