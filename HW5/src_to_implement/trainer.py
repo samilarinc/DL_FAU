@@ -77,7 +77,7 @@ class Trainer:
         out = self._model(x)
         loss = self._crit(out, y.float())
         out = out.detach().cpu().numpy()
-        pred = np.array(out > 0.5).astype(int)
+        pred = np.array(out > 0.75).astype(int)
         return loss.item(), pred
         
     def train_epoch(self):
