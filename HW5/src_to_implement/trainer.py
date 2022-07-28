@@ -14,10 +14,12 @@ class Trainer:
                  train_dl=None,                # Training data set
                  val_test_dl=None,             # Validation (or test) data set
                  cuda=True,                    # Whether to use the GPU
-                 early_stopping_patience=-1):  # The patience for early stopping
+                 early_stopping_patience=-1,
+                 scheduler=None):  # The patience for early stopping
         self._model = model
         self._crit = crit
         self._optim = optim
+        self._scheduler = scheduler
         self._train_dl = train_dl
         self._val_test_dl = val_test_dl
         self._cuda = cuda
@@ -65,6 +67,8 @@ class Trainer:
         loss = self._crit(out, y.float())
         loss.backward()
         self._optim.step()
+        if self._scheduler is not None:
+            self._scheduler.step()
         return loss.item()
         
         
@@ -77,7 +81,7 @@ class Trainer:
         out = self._model(x)
         loss = self._crit(out, y.float())
         out = out.detach().cpu().numpy()
-        pred = np.array(out > 0.75).astype(int)
+        pred = np.array(out > 0.5).astype(int)
         return loss.item(), pred
         
     def train_epoch(self):
