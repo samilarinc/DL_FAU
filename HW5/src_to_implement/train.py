@@ -31,7 +31,7 @@ model = model.ResNet()
 crit = t.nn.BCELoss()
 # optimizer = t.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 # optimizer = t.optim.SGD(model.parameters(), lr=1e-3, weight_decay=5*1e-5)
-optimizer = t.optim.SGD(model.parameters(), lr=1e-3, momentum=0.8)
+optimizer = t.optim.SGD(model.parameters(), lr=1e-3, momentum=0.7)
 # scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 scheduler = None
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, scheduler=scheduler)
