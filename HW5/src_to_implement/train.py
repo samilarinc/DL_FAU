@@ -31,7 +31,7 @@ model = model.ResNet()
 crit = t.nn.BCELoss()
 # optimizer = t.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 # optimizer = t.optim.SGD(model.parameters(), lr=1e-3, weight_decay=5*1e-5)
-optimizer = t.optim.SGD(model.parameters(), lr=1e-3, momentum=0.7)
+optimizer = t.optim.SGD(model.parameters(), lr=1e-3, momentum=0.7, weight_decay=0.135)
 # scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 scheduler = None
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, scheduler=scheduler)
@@ -39,7 +39,7 @@ trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, scheduler
                   # )
 
 # go, go, go... call fit on trainer
-res = trainer.fit(epochs=100)
+res = trainer.fit(epochs=50)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')
