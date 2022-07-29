@@ -32,6 +32,7 @@ class Trainer:
             
     def save_checkpoint(self, epoch):
         t.save({'state_dict': self._model.state_dict()}, 'checkpoints/checkpoint.ckp')
+        self.save_onnx('checkpoints/model.onnx')
     
     def restore_checkpoint(self, epoch_n, path='checkpoints'):
         ckp = t.load(f'{path}/checkpoint.ckp', 'cuda' if self._cuda else None)
@@ -155,6 +156,10 @@ class Trainer:
             print('Epoch: %3d'%(epoch_n+1))
             train_loss = self.train_epoch()
             val_loss, val_metric = self.val_test()
+            
+            if len(val_losses) != 0 and val_loss < min(val_losses):
+                self.save_checkpoint(epoch_n)
+            
             train_losses.append(train_loss)
             val_losses.append(val_loss)
             val_metrics.append(val_metric)
@@ -163,7 +168,6 @@ class Trainer:
                 if len(val_losses) > self._early_stopping_patience:
                     if val_losses[-1] > val_losses[-self._early_stopping_patience-1]:
                         break
-            self.save_checkpoint(epoch_n)
             epoch_n += 1
             print('\tTrain Loss: %.4f\tVal Loss: %.4f\tVal Metric: %.4f'%(train_loss, val_loss, val_metric))
         return train_losses, val_losses, val_metrics
