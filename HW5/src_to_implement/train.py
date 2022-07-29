@@ -29,9 +29,9 @@ model = model.ResNet()
 # create an object of type Trainer and set its early stopping criterion
 # TODO
 crit = t.nn.BCELoss()
-optimizer = t.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5, )
+optimizer = t.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 # optimizer = t.optim.SGD(model.parameters(), lr=1e-3, weight_decay=5*1e-5)
-scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
+# scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, scheduler=scheduler)
                 #   early_stopping_patience=25
                   # )
