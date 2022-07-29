@@ -7,4 +7,5 @@ import model
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-trainer.restore_checkpoint(0, '../last/')
+Trainer.restore_checkpoint(0, '../last/')
+Trainer.save_onnx('last_model.onnx')
