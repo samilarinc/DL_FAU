@@ -84,7 +84,9 @@ class Trainer:
         out = self._model(x)
         loss = self._crit(out, y.float())
         out = out.detach().cpu().numpy()
-        pred = np.array(out > 0.5).astype(int)
+        pred_0 = np.array(out[:, 0] > 0.5).astype(int)
+        pred_1 = np.array(out[:, 1] > 0.5).astype(int)
+        pred = np.stack([pred_0, pred_1], axis=1)
         return loss.item(), pred
         
     def train_epoch(self):

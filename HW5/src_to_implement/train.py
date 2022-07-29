@@ -17,8 +17,8 @@ train_tab, val_tab = train_test_split(tab, test_size=0.2, random_state=31)
 
 # set up data loading for the training and validation set each using t.utils.data.DataLoader and ChallengeDataset objects
 # TODO
-train_dl = t.utils.data.DataLoader(ChallengeDataset(train_tab, 'train'), batch_size=32, shuffle = True)
-val_dl = t.utils.data.DataLoader(ChallengeDataset(val_tab, 'val'), batch_size=32)
+train_dl = t.utils.data.DataLoader(ChallengeDataset(train_tab, 'train'), batch_size=64, shuffle = True)
+val_dl = t.utils.data.DataLoader(ChallengeDataset(val_tab, 'val'), batch_size=64)
 
 # create an instance of our ResNet model
 # TODO
@@ -28,10 +28,10 @@ model = model.ResNet()
 # set up the optimizer (see t.optim)
 # create an object of type Trainer and set its early stopping criterion
 # TODO
-crit = t.nn.BCELoss()
-# optimizer = t.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+crit = t.nn.MSELoss()
+optimizer = t.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5)
 # optimizer = t.optim.SGD(model.parameters(), lr=1e-3, weight_decay=5*1e-5)
-optimizer = t.optim.SGD(model.parameters(), lr=1e-3, momentum=0.8)
+# optimizer = t.optim.SGD(model.parameters(), lr=1e-2, momentum=0.8)
 # scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 scheduler = None
 trainer = Trainer(model, crit, optimizer, train_dl, val_dl, cuda=True, scheduler=scheduler)
