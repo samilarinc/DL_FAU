@@ -53,6 +53,8 @@ class Trainer:
               output_names = ['output'], # the model's output names
               dynamic_axes={'input' : {0 : 'batch_size'},    # variable lenght axes
                             'output' : {0 : 'batch_size'}})
+        if self._cuda:
+            m = self._model.cuda()
             
     def train_step(self, x, y):
         # perform following steps:
